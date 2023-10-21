@@ -24,6 +24,8 @@ enum status_codes geometric_mean (double * res, int count, ...)
     for (int i = 0; i < count; ++i)
         *res *= va_arg(ptr, double);
     
+    if (*res < 0.0 && (count % 2 == 0))
+        return fsc_invalid_parameter;
     
     *res = pow(*res, 1.0 / count);
     return fsc_ok;
@@ -35,7 +37,7 @@ int main(int argc, const char * argv[])
     
     double res;
     
-    function_result =  geometric_mean(&res, 0);
+    function_result =  geometric_mean(&res, 2, -2.0, 3.0);
     if (function_result == fsc_ok)
         printf("%lf\n", res);
     
