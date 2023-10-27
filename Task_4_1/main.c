@@ -25,7 +25,7 @@ bool polygon_is_convex (int count, ...)
     va_list ptr;
     va_start(ptr, count);
     
-    Vector2D vertex_start;//Вершина с которой начинается обход
+    Vector2D vertex_start;
     vertex_start.x = va_arg(ptr, double);
     vertex_start.y = va_arg(ptr, double);
     tmp_count--;
@@ -43,6 +43,9 @@ bool polygon_is_convex (int count, ...)
     Vector2D vector_1;
     Vector2D vector_start = vector_2;
     
+    bool sign_ready = false;
+    bool is_sign_positive = true;
+    
     for (int i = 0; i <= tmp_count + 1; ++i)
     {
         vertex_1 = vertex_2;
@@ -50,7 +53,7 @@ bool polygon_is_convex (int count, ...)
         
         if (i > tmp_count)
         {
-            vector_2 = vector_start; 
+            vector_2 = vector_start;
         }
         else
         {
@@ -69,8 +72,18 @@ bool polygon_is_convex (int count, ...)
                 
 
         double vector_product = vector_1.x * vector_2.y - vector_2.x * vector_1.y;
-        if (vector_product < 0)
-            return false;
+        
+        if (!sign_ready)
+        {
+            is_sign_positive = vector_product > 0;
+            sign_ready = true;
+        }
+        else
+        {
+            if ((vector_product > 0) != is_sign_positive)
+                return false;
+        }
+
     }
 
     return true;
