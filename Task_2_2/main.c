@@ -31,7 +31,7 @@ double fast_pow(double n, int p)
 
 int main(int argc, const char * argv[])
 {
-    printf("%lf\n", fast_pow(-3, 3));
+    printf("%lf\n", fast_pow(0, 0));
     
     return 0;
 }
