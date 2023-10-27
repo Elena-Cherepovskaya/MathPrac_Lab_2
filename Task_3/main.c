@@ -22,10 +22,24 @@ enum status_codes
     fsc_substring_not_found,
 };
 
-enum status_codes find_substr(char* str, int count, ...)
+typedef struct
+{
+    char* file_name;
+    int num_of_str;
+    int num_of_char;
+}substr_detect;
+
+enum status_codes find_substr(char* str, substr_detect** list_of_substr, int* real_len_of_list_of_str, int count, ...)
 {
     if (count <= 0)
         return fsc_invalid_parameter;
+    
+    int max_len_of_list_of_str = 128;
+    *real_len_of_list_of_str = 0;
+    
+    *list_of_substr = malloc(sizeof(substr_detect) * max_len_of_list_of_str);
+    if (*list_of_substr == NULL)
+        return fsc_memory_error_detected;
     
     va_list ptr;
     va_start(ptr, count);
@@ -44,6 +58,8 @@ enum status_codes find_substr(char* str, int count, ...)
             fseek(file_input, 0, SEEK_END);
             int size_of_buffer = ftell(file_input);
             char* buffer = malloc(sizeof(char) * (size_of_buffer + 1));
+            if (buffer == NULL)
+                return fsc_memory_error_detected;
             memset(buffer, 0, size_of_buffer + 1);
             fseek(file_input, 0, SEEK_SET);
             fread(buffer, sizeof(char), size_of_buffer, file_input);
@@ -85,7 +101,15 @@ enum status_codes find_substr(char* str, int count, ...)
                 if (str_ready)
                 {
                     flag = true;
-                    printf("%s:\n%d %d\n",file, num_of_str, ind_in_str);
+                    if (*real_len_of_list_of_str < max_len_of_list_of_str)
+                    {
+                        max_len_of_list_of_str *= 2;
+                        *list_of_substr = realloc(*list_of_substr, sizeof(substr_detect) * max_len_of_list_of_str);
+                        (*list_of_substr)[*real_len_of_list_of_str].file_name = file;
+                        (*list_of_substr)[*real_len_of_list_of_str].num_of_str = num_of_str;
+                        (*list_of_substr)[*real_len_of_list_of_str].num_of_char = ind_in_str;
+                        ++(*real_len_of_list_of_str);
+                    }
                 }
             }
             free(buffer);
@@ -98,8 +122,16 @@ int main(int argc, const char * argv[])
 {
     enum status_codes function_result = fsc_unknown;
     
-    function_result = find_substr("733", 3, "/Users/lena/file_1.txt", "/Users/lena/file_2.txt", "/Users/lena/file_3.txt");
-
+    substr_detect* list_of_substr;
+    int real_len_of_list_of_substr = 0;
+    function_result = find_substr("733", &list_of_substr, &real_len_of_list_of_substr, 3, "/Users/lena/file_1.txt", "/Users/lena/file_2.txt", "/Users/lena/file_3.txt");
+    
+    if (function_result == fsc_ok)
+    {
+        for (int i = 0; i < real_len_of_list_of_substr; ++i)
+            printf("%s:\n%d %d\n",list_of_substr[i].file_name, list_of_substr[i].num_of_str, list_of_substr[i].num_of_char);
+        free(list_of_substr);
+    }
     switch (function_result)
     {
         case fsc_ok:
