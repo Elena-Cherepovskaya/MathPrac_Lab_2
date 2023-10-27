@@ -25,63 +25,61 @@ bool polygon_is_convex (int count, ...)
     va_list ptr;
     va_start(ptr, count);
     
-    Vector2D vertex_start;
+    Vector2D vertex_start;//Вершина с которой начинается обход
     vertex_start.x = va_arg(ptr, double);
     vertex_start.y = va_arg(ptr, double);
     tmp_count--;
-    
-    Vector2D vertex_1;
-    vertex_1.x = va_arg(ptr, double);
-    vertex_1.y = va_arg(ptr, double);
-    tmp_count--;
-    
-    Vector2D list_of_sides[count];
-    int ind_list_of_sides = 0;
-    
-    list_of_sides[ind_list_of_sides].x = vertex_start.x - vertex_1.x;
-    list_of_sides[ind_list_of_sides].y = vertex_start.y - vertex_1.y;
-    ++ind_list_of_sides;
+    Vector2D vertex_1 = vertex_start;
     
     Vector2D vertex_2;
-    for (int i = 0; i < tmp_count; ++i)
-    {
-        vertex_2.x = va_arg(ptr, double);
-        vertex_2.y = va_arg(ptr, double);
-        
-        list_of_sides[ind_list_of_sides].x = vertex_1.x - vertex_2.x;
-        list_of_sides[ind_list_of_sides].y = vertex_1.y - vertex_2.y;
-        ++ind_list_of_sides;
-        
-        vertex_1 = vertex_2;
-        
-        //vertex_1.x = vertex_2.x;
-        //vertex_1.y = vertex_2.y;
-    }
-
-    list_of_sides[ind_list_of_sides].x = vertex_2.x - vertex_start.x;
-    list_of_sides[ind_list_of_sides].y = vertex_2.y - vertex_start.y;
-
-    ind_list_of_sides = 0;
-    double vector_product = list_of_sides[count - 1].x * list_of_sides[ind_list_of_sides].y - list_of_sides[ind_list_of_sides].x * list_of_sides[count - 1].y;
+    vertex_2.x = va_arg(ptr, double);
+    vertex_2.y = va_arg(ptr, double);
+    tmp_count--;
     
-    bool difference_positive = (vector_product >= 0.0) ? true : false;
-
-    for (int i = 0; i < count - 1; ++i)
+    Vector2D vector_2;
+    vector_2.x = vertex_1.x - vertex_2.x;
+    vector_2.y = vertex_1.y - vertex_2.y;
+    
+    Vector2D vector_1;
+    Vector2D vector_start = vector_2;
+    
+    for (int i = 0; i <= tmp_count + 1; ++i)
     {
-        vector_product = list_of_sides[i].x * list_of_sides[i + 1].y - list_of_sides[i + 1].x * list_of_sides[i].y;
+        vertex_1 = vertex_2;
+        vector_1 = vector_2;
         
-        bool tmp_difference_positive = (vector_product >= 0.0);
+        if (i > tmp_count)
+        {
+            vector_2 = vector_start; 
+        }
+        else
+        {
+            if (i == tmp_count)
+            {
+                vertex_2 = vertex_start;
+            }
+            else
+            {
+                vertex_2.x = va_arg(ptr, double);
+                vertex_2.y = va_arg(ptr, double);
+            }
+            vector_2.x = vertex_1.x - vertex_2.x;
+            vector_2.y = vertex_1.y - vertex_2.y;
+        }
+                
 
-        if (difference_positive != tmp_difference_positive)
+        double vector_product = vector_1.x * vector_2.y - vector_2.x * vector_1.y;
+        if (vector_product < 0)
             return false;
     }
+
     return true;
 }
 
 
 int main(int argc, const char * argv[])
 {
-    printf("Многоугольник %s выпуклый\n", (polygon_is_convex(3, 1.0, 1.0, 2.0, 1.0, 2.0, 2.0)) ? "" : "не");
+    printf("Многоугольник %s выпуклый\n", (polygon_is_convex(4, 1.0, 1.0, 2.0, 1.0, 2.0, 2.0, 1.0, 2.0)) ? "" : "не");
     
     return 0;
 }
