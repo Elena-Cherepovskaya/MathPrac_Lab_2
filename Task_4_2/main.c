@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <math.h>
 
 enum status_codes
 {
@@ -22,23 +23,14 @@ enum status_codes value_polynom (double * res, double point, int p, ...)
         return fsc_invalid_parameter;
     
     *res = 0.0;
-    
-    double list_of_coefficients[p + 1];
+
     va_list ptr;
     va_start(ptr, p);
     
     int count = p + 1;
     for (int i = 0; i < count; ++i)
-    {
-        list_of_coefficients[i] = va_arg(ptr, double);
-    }
-    
-    double velue_pow = 1.0;
-    for (int i = p; i >= 0; --i)
-    {
-        *res = *res + list_of_coefficients[i] * velue_pow;
-        velue_pow *= point;
-    }
+        *res = *res + (va_arg(ptr, double) * pow(point, i));
+
     
     return fsc_ok;
 }
